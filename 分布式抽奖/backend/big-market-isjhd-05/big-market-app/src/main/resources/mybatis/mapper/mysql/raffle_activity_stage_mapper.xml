@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.isjhd.infrastructure.dao.IRaffleActivityStageDao">
+
+    <resultMap id="dataMap" type="cn.isjhd.infrastructure.dao.po.RaffleActivityStage">
+        <id column="id" property="id"/>
+        <result column="channel" property="channel"/>
+        <result column="source" property="source"/>
+        <result column="activity_id" property="activityId"/>
+        <result column="state" property="state"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="cn.isjhd.infrastructure.dao.po.RaffleActivityStage">
+        insert into raffle_activity_stage(channel, source, activity_id, state, create_time, update_time)
+        values (
+        #{channel},#{source},#{activityId},#{state},now(),now()
+        )
+    </insert>
+    
+    <update id="updateStageActivity2ActiveById" parameterType="java.lang.Long">
+        update raffle_activity_stage set state = 'active'
+        where id = #{id}
+    </update>
+
+    <select id="queryStageActivity2ActiveById" parameterType="java.lang.Long" resultType="java.lang.Long">
+        select activity_id from raffle_activity_stage where id = #{id}
+    </select>
+
+    <select id="queryStageActiveBySC" parameterType="cn.isjhd.infrastructure.dao.po.RaffleActivityStage" resultType="java.lang.Long">
+        select activity_id from raffle_activity_stage
+        where
+            channel = #{channel} and
+            source = #{source} and
+            state = 'active'
+        limit 1
+    </select>
+
+    <select id="queryStageActivityList" resultMap="dataMap">
+        select id, channel, source, activity_id, state, create_time, update_time
+        from raffle_activity_stage
+        order by id desc
+    </select>
+
+</mapper>

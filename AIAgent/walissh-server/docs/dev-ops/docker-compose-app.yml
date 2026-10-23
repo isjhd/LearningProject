@@ -1,0 +1,43 @@
+# /usr/local/bin/docker-compose -f /docs/dev-ops/environment/environment-docker-compose-2.4.yml up -d
+version: '3.8'
+# docker-compose -f docker-compose-app.yml up -d
+# 你需要修改system为你自身系统的仓库名
+services:
+  ai-mcp-gateway:
+    image: registry.cn-hangzhou.aliyuncs.com/fuzhengwei/walissh-server-app:1.0
+    container_name: walissh-server-app
+    restart: on-failure
+    ports:
+      - "8091:8091"
+    environment:
+      - TZ=PRC
+      - SERVER_PORT=8091
+      # SSH Agent AI-API 配置 (来自 ssh-agent.yml)
+      - AI_AGENT_CONFIG_TABLES_SSHAGENT_AGENT_MODULE_AI_API_BASE_URL=https://apis.itedus.cn
+      - AI_AGENT_CONFIG_TABLES_SSHAGENT_AGENT_MODULE_AI_API_API_KEY=sk-K3E36mI9iXXI4Nbo1d7a91305707440d83E8C0Ab491874D5
+      - AI_AGENT_CONFIG_TABLES_SSHAGENT_AGENT_MODULE_AI_API_COMPLETIONS_PATH=v1/chat/completions
+      - AI_AGENT_CONFIG_TABLES_SSHAGENT_AGENT_MODULE_AI_API_EMBEDDINGS_PATH=v1/embeddings
+      - AI_AGENT_CONFIG_TABLES_SSHAGENT_AGENT_MODULE_CHAT_MODEL_MODEL=gpt-5.1
+      # 意图识别 AI-API 配置 (来自 application-dev.yml intent-ai-api)
+      - INTENT_AI_API_BASE_URL=https://apis.itedus.cn
+      - INTENT_AI_API_API_KEY=sk-K3E36mI9iXXI4Nbo1d7a91305707440d83E8C0Ab491874D5
+      - INTENT_AI_API_COMPLETIONS_PATH=v1/chat/completions
+      - INTENT_AI_API_EMBEDDINGS_PATH=v1/embeddings
+      - INTENT_AI_API_CHAT_MODEL_MODEL=gpt-5.1
+      # 数据库配置 (来自 application-dev.yml spring.datasource)
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/walissh?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+    volumes:
+      - ./log:/data/log
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge

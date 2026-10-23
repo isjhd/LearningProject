@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生管理</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    
+    <div class="container">
+
+		<!-- 上 -->
+		<div class="topContent">
+			<div class="manger">教 务 管 理 系 统</div>
+			<div class="other">
+				<div class="left"><img src="images/1.gif"/></div>
+                <div>阿良良木历</div>
+                <a href="teacherUpdataDataManager.html">修改资料</a>
+				<a href="#">
+					<input type='button' value='退出' id="exitLogin">
+				</a>
+			</div>
+		</div>
+		<!-- 上 -->
+	
+		<!-- 中 -->
+		<div class="centerContent">
+			<div class="leftContent">
+				<a href="teacherMain.html">学 生 管 理</a>
+				<a href="teacherClassManager.html">班 级 管 理</a>
+				<a href="teacherActivityManager.html">活 动 管 理</a>
+				<a href="teacherResourceManager.html">资 料 下 载</a>
+			</div>
+			<div class="rightContent">
+				<h2>学生管理</h2>
+				<div>
+                    <form action="#">
+                        <div>
+                            <select>
+                                <option selected="selected">--请选择班级--</option>
+                                <option>1903</option>
+                                <option>1904</option>
+                                <option>1905</option>
+                            </select>
+                            学号：<input type="text">
+                            班级：<input type="text">
+                        </div>
+                        <table>
+                            <tr>
+                                <th>学号</th>
+                                <th>姓名</th>
+                                <th>性别</th>
+                                <th>联系方式</th>
+                                <th>家庭地址</th>
+                                <th>班级</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+
+                            <tr>
+                                <td>112715650</td>
+                                <td>平泽唯</td>
+                                <td><h3>♀</h3></td>
+                                <td>135 5785 2355</td>
+                                <td>淮南以北</td>
+                                <td>1903</td>
+                                <td>在读</td>
+                                <td>
+                                    <a href="add/modifyStudents.html">修改学生信息</a>
+                                    <input type="button" value="开除学生">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="8">当前页: 1, 总页数: 1</td>
+                            </tr>
+                            <tr>
+                                <td><a href="add/addStudent.html">添加学生</a></td>
+                                <td colspan="2"><input type="button" value="首页"></td>
+                                <td colspan="2"><input type="button" value="上一页"></td>
+                                <td colspan="2"><input type="button" value="下一页"></td>
+                                <td><input type="button" value="尾页"></td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+			</div>
+		</div>
+		<!-- 中 -->
+	
+		<!-- 下 -->
+		<div class="bottomContent">
+			<h4>哔哩哔哩无矿产业大学<img src="images/3.gif" align="right" width="110px"></h4>
+		</div>
+		<!-- 下 -->
+	
+	
+	</div>
+
+</body>
+</html>

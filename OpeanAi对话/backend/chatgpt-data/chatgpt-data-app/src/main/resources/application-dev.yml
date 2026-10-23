@@ -1,0 +1,193 @@
+server:
+  port: 8091
+  # 1核2G内存，线程数经验值200；4核8G内存【accept-count=1000、max-threads=800、max-connections=10000】，线程数经验值800。线程池过大，cpu调度会消耗大量时间
+  tomcat:
+    mbeanregistry:
+      enabled: true
+    max-connections: 100
+    threads:
+      max: 100        # 设定处理客户请求的线程的最大数目，决定了服务器可以同时响应客户请求的数,默认200
+      min-spare: 50   # 初始化线程数,最小空闲线程数,默认是10
+    accept-count: 10  # 等待队列长度
+
+# 应用配置
+app:
+  config:
+    # 版本，方便通过接口版本升级
+    api-version: v1
+    # 跨域，开发阶段可以设置为 * 不限制
+    cross-origin: '*'
+    # 访问频次限制
+    limit-count: 10
+    # 白名单，不做频次拦截【微信的openai】oxfA9w8-23yvwTmo2ombz0E4zJv4
+    white-list: ojbZUv18lbmriaTjcCWBYkOrSbHA
+    # 模型
+    model-types: glm-4,gpt-4,chatglm_pro
+    # 接口 appId、appToken - 调用 big-market 分配参数
+    big-market:
+      appId: chatgpt-data
+      appToken: 89iu7o8732ijd9114
+
+# 支付配置；如果你申请了支付渠道，则可以配置 enable = true，否则就配置 false 走流程测试
+wxpay:
+  config:
+    # 状态；true = 开启、false 关闭
+    enabled: false
+    # 申请支付主体的 appid
+    appid:
+    # 商户号
+    mchid:
+    # 回调地址
+    notify-url: http://你的地址.natapp1.cc/api/v1/mall/pay_notify
+    # 商户API私钥路径
+    private-key-path: cert/apiclient_key.pem
+    # 商户证书序列号：openssl x509 -in apiclient_cert.pem -noout -serial
+    merchant-serial-number:
+    # 商户APIV3密钥
+    api-v3-key:
+
+# 支付宝支付 - 沙箱 https://opendocs.alipay.com/common/02kkv7
+alipay:
+  enabled: true
+  app_id: 9021000159640279 # 支付宝沙箱应用唯一标识
+  # 私钥
+  merchant_private_key: MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCDe5NIi79hTnBZr0kOsSl5hRpKl9hx6BDR3xBqFH1r6l2DaFV72oAtbndGqpdFXWgju2mxPZHeo4iX++FTFtHh3kR8WSZRklpEvcRTmwX/XMKa+jHUbAnzeBEnOZ+m4A2LyEyAsPg7ekvzNDcEkj2daIXcb1k/aCJde/WZFYnDUCr3ka6r6INv8CDErjzKflzVTavfqRQg91DnvGyGegc0xfIjdvKJAeimAQ25aLgLugTtSXnb5nJ0C7TsjIaXYC3q+Kn6Sw+gq5okD5NopCQ8Cu9GPAbZUKBwdTs6Hy4jcPjDNLSvPRg8z9NNmkkeqcQUr5QItpRBsAJ43iNxw2mDAgMBAAECggEAQl5JXRA1fW+zpIGnVgQ1VELMn6SAPBcRDm8TgQhwut1lcKRkqg0EMGqXSJNpojjhDVBXrIDQtdpEY7tf5KobLXEdjssNXZWLfTFw/Wa+I0V2cfYi2v/iEgSkW/FpVjm4fLuRalBqLNOxrMTJlMQg1+jf0QJfwXLWDew5b5mAnZaLreTley4yjOwNGRu2RRg9fCqpfMqnWO4wrjpFOKRq/MMi6SnJg6HJ1WgPpqYvW116rS4lvrEPFBzXIZbhaXsSflOrkczyF6KGAKDF/QjZBcyk07OKexKbFw6UHd4Wajmkk8X3YWBRDpw6U+oIBxm8x9X4eYJJjgwDeJZNr5uREQKBgQC55CTQT/sAJkOjWLuT52AEAA3LVVl9l41n1uJYCC1vUcr1I2/ym6uhcOshbuIk3yP8ueVZsvRZixHTkbsNRhcDX4DWWu3X9Yz5HjP1aoon8QxcqeE7NUpLf7kS1AeZKBdSmU+bnnxOTuA/NTwGZSDR22TLdveoLdKrb35WRZlWywKBgQC1EkaHXIK68VdJugoU23v+rOZAZQKEt9Fc3tZ6Z0Wfq5YyH4aUmPQEja96rultb8QVgYljMVnvdAIQ2dDmtw1Y32JMeOg59llv8ZGtkGiMEh5RulLG4m2QLousm+eVyMM8XcUo23O7fWQ3Abbv/5AsyPIBCrGkbGms1lz9gCopKQKBgEas5AZDcmXzJmIzeVXZcVrz/kqhj529gijJvVLFASlCysx7BbQS1aVSvkL+2oI0SIVs1DNPY7Gru0JaNOjuDg/dPqnA9o7WMBwDDLQxJofbEN0mRZjyQOYFkIMFFEJ5yKxB18+N6SsIuB+wCLtRtbG0HVVyTOSnT2KYyErauVsTAoGBAKEiZ1M0Nz5HYSdCAJC5FWn40VpCyW/z6MNdpr38ww+pcZqfRXNdfeHDeIKTvzTdPkDpKqr0ExWtRd1bCLUX9y+8csyc2AQkv0iIT9yF4xOrWAHg7qMAgwHI+hEcGIXJyDwjMj3+tMoHdzQgOXzwD4xbMklNC/LHa28cwFnzQRGpAoGBAICn60x0oieNV8hkm+0tRe9b+RIjkwgdxhjJdsoxUQ2b6A4t4Qf2CDkyOFe1hNMS6Lv3lWap1KsbPrVYKj90kvvwMAMBs5d/GWE3rH94EP+zvEdsxQT+jr3plj8pyqpQVxiRjdQ3duGBMR7k6IomAOu99vo4bqlJov3ohH4XEf+6
+  # 公钥
+  alipay_public_key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAh51kJkcBko+ul2KaNnfx27EAd1ipCPqdZxOhJA4eB/UmiKy6v8fXg7Fzbzffxn/mnEDwtxyt6f46qB3er1eXVKLPGSQf40FBcumh/1OcuKjyt/Cbs7eY2mr5XXpjPoXYt3S4IMzWp/LbEDFYYmMLp3mCbvKiHzwqyz1pHU4w5RsZlTsHU8Q02tVAr1AtNlhspv3yMYOrRrnbCQGKb4VvS9x3huJ+kTECMJY8ZOZp/pis/Gr8mJm9TtPaDe6cL7iFxtKvAcVP6Q5LFslFfo7Rerj9GQHtEwhJzj8S1fDq2MPj4WCnHMuJRrqydU1oAysQ7lxoRAY8FyKoVHukW1sV9wIDAQAB
+  # 异步通知地址
+  notify_url: http://q5498d69.natappfree.cc/api/v1/sale/pay_notify
+  # 完成后跳转地址
+  return_url: http://localhost:3002/#/sale
+  # 支付宝沙箱网关地址
+  gatewayUrl: https://openapi-sandbox.dl.alipaydev.com/gateway.do
+
+
+
+# 线程池配置
+thread:
+  pool:
+    executor:
+      config:
+        core-pool-size: 20
+        max-pool-size: 50
+        keep-alive-time: 5000
+        block-queue-size: 5000
+        policy: CallerRunsPolicy
+
+# ChatGPT SDK Config
+chatgpt:
+  sdk:
+    config:
+      # 状态；true = 开启、false 关闭
+      enabled: false
+      # 官网地址 https://api.openai.com/ 1美金:7人民币。或者有ApiHost 这种代理地址和key，淘宝也可以
+      api-host: https://pro-share-aws-api.zcyai.com/
+      # 官网申请 https://platform.openai.com/account/api-keys
+      api-key: sk-oLkakcax33mJl628D3A533Fd67A24602Ac37D69***
+
+# ChatGLM SDK Config
+chatglm:
+  sdk:
+    config:
+      # 状态；true = 开启、false 关闭
+      enabled: true
+      # 官网地址
+      api-host: https://open.bigmodel.cn/
+      # 官网申请 https://open.bigmodel.cn/usercenter/apikeys - 自己可申请(默认18块的额度很够用)，也推荐测试学习的时候，使用 ChatGLM
+      api-secret-key: c545b5a1d03042f9872b22a22f29b6a3.PwbHQ55ASCn3Ickn
+
+
+
+# 微信公众号配置信息
+# originalid：原始ID
+# appid：个人AppID
+# token：开通接口服务自定义设置
+wx:
+  config:
+    originalid: gh_31a0273179d7
+    appid: wx733068f7cca0a344
+    token: isjhd
+
+# 数据库配置；SpringBoot 默认连接池为 HikariDataSource
+spring:
+  datasource:
+    username: root
+    password: wj1314520
+    url: jdbc:mysql://111.228.40.67:13306/openai?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  hikari:
+    pool-name: Retail_HikariCP
+    minimum-idle: 15 #最小空闲连接数量
+    idle-timeout: 180000 #空闲连接存活最大时间，默认600000（10分钟）
+    maximum-pool-size: 25 #连接池最大连接数，默认是10
+    auto-commit: true  #此属性控制从池返回的连接的默认自动提交行为,默认值：true
+    max-lifetime: 1800000 #此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认1800000即30分钟
+    connection-timeout: 30000 #数据库连接超时时间,默认30秒，即30000
+    connection-test-query: SELECT 1
+  type: com.zaxxer.hikari.HikariDataSource
+
+mybatis:
+  mapper-locations: classpath:/mybatis/mapper/*.xml
+  config-location:  classpath:/mybatis/config/mybatis-config.xml
+
+# Redis
+redis:
+  sdk:
+    config:
+      password: wj1314520
+      host: 111.228.40.67
+      port: 16379
+      pool-size: 10
+      min-idle-size: 5
+      idle-timeout: 30000
+      connect-timeout: 5000
+      retry-attempts: 3
+      retry-interval: 1000
+      ping-interval: 60000
+      keep-alive: true
+
+dubbo:
+  application:
+    name: chatgpt-data
+    version: 1.0
+  registry:
+    id: nacos-registry
+    # address: N/A
+    # address: #multicast://224.5.6.7:1234
+    # address: zookeeper://127.0.0.1:2181
+    # address: nacos://192.168.1.108:8848
+    address: nacos://192.168.1.108:8848 # N/A nacos://192.168.1.108:8848
+  protocol:
+    name: dubbo
+    port: -1
+
+# 监控
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*" # 暴露所有端点，包括自定义端点
+  endpoint:
+    metrics:
+      enabled: true
+    health:
+      show-details: always # 显示详细的健康检查信息
+  metrics:
+    export:
+      prometheus:
+        enabled: true # 启用Prometheus
+  prometheus:
+    enabled: true # 启用Prometheus端点
+  jmx:
+    enabled: true # 启用JMX监控
+  system:
+    cpu:
+      enabled: true # 启用CPU监控
+    memory:
+      enabled: true # 启用内存监控
+
+# 日志
+logging:
+  level:
+    root: info
+  config: classpath:logback-spring.xml

@@ -1,0 +1,100 @@
+version: '3.8'
+# 命令执行 docker-compose -f docker-compose-app.yml up -d
+services:
+  # 大营销后端
+  big-market-app-01:
+    image: fuzhengwei/big-market-app:5.1
+    container_name: big-market-app-01
+    restart: always
+    ports:
+      - "8092:8092"
+    environment:
+      - TZ=PRC
+      - SERVER_PORT=8092
+      - APP_CONFIG_API_VERSION=v1
+      - APP_CONFIG_CROSS_ORIGIN=*
+      - ZOOKEEPER_SDK_CONFIG_ENABLE=true
+      - SPRING_RABBITMQ_ADDRESSES=111.228.40.67
+    volumes:
+      - ./log:/data/log
+    networks:
+      - my-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 大营销后端
+  big-market-app-02:
+    image: fuzhengwei/big-market-app:5.1
+    container_name: big-market-app-02
+    restart: always
+    ports:
+      - "8093:8093"
+    environment:
+      - TZ=PRC
+      - SERVER_PORT=8093
+      - APP_CONFIG_API_VERSION=v1
+      - APP_CONFIG_CROSS_ORIGIN=*
+      - ZOOKEEPER_SDK_CONFIG_ENABLE=true
+      - SPRING_RABBITMQ_ADDRESSES=111.228.40.67
+    volumes:
+      - ./log:/data/log
+    networks:
+      - my-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # OpenAI 应用后端
+  chatgpt-data-app:
+    image: fuzhengwei/chatgpt-data-app:5.1
+    container_name: chatgpt-data-app
+    ports:
+      - "8091:8091"
+    environment:
+      - TZ=PRC
+      - SERVER_PORT=8091
+      - APP_CONFIG_API_VERSION=v1
+      - APP_CONFIG_CROSS_ORIGIN=*
+      - APP_CONFIG_LIMIT_COUNT=3
+      - APP_CONFIG_WHITE_LIST=ojbZUv18lbmriaTjcCWBYkOrSbHA
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=wj1314520
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/openai?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+      - WX_CONFIG_ORIGINALID=gh_31a0273179d7
+      - WX_CONFIG_APPID=wx733068f7cca0a344
+      - WX_CONFIG_TOKEN=isjhd
+      - CHATGPT_SDK_CONFIG_ENABLED=false
+      - CHATGPT_SDK_CONFIG_API_HOST=https://service-d6wuqy4n-1320869466.cd.apigw.tencentcs.com/
+      - CHATGPT_SDK_CONFIG_API_KEY=sk-cVvbudeJq3yQUvcyCeBeB97253C146BaAaC94d70D2890b8e
+      - CHATGLM_SDK_CONFIG_ENABLED=true
+      - CHATGLM_SDK_CONFIG_API_HOST=https://open.bigmodel.cn/
+      - CHATGLM_SDK_CONFIG_API_KEY=c545b5a1d03042f9872b22a22f29b6a3.PwbHQ55ASCn3Ickn
+    volumes:
+      - ./log:/data/log
+    networks:
+      - my-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: always
+
+  # OpenAI 应用前端
+  chatgpt-web-app:
+    container_name: chatgpt-web-app
+    image: fuzhengwei/chatgpt-web-app:5.1
+    ports:
+      - "3002:3002"
+    networks:
+      - my-network
+    restart: always
+
+networks:
+  my-network:
+    driver: bridge

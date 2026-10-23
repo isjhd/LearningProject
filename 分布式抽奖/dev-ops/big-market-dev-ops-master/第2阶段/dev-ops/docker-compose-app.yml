@@ -1,0 +1,77 @@
+version: '3.8'
+# 命令执行 docker-compose -f docker-compose-app.yml up -d
+services:
+  big-market-app:
+    image: fuzhengwei/big-market-app:2.0
+    container_name: big-market-app
+    restart: always
+    ports:
+      - "8091:8091"
+    environment:
+      - TZ=PRC
+      - SERVER_PORT=8091
+      - APP_CONFIG_API_VERSION=v1
+      - APP_CONFIG_CROSS_ORIGIN=*
+      # Database configurations
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DBCOUNT=2
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_TBCOUNT=4
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DEFAULT=db00
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_ROUTERKEY=userId
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_LIST=db01,db02
+      # db00 configuration
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DB00_URL=jdbc:mysql://mysql:3306/big_market?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DB00_USERNAME=root
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DB00_PASSWORD=123456
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DB00_POOL_NAME=Retail_HikariCP
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DB00_MINIMUM_IDLE=15
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DB00_IDLE_TIMEOUT=180000
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DB00_MAXIMUM_POOL_SIZE=25
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DB00_AUTO_COMMIT=true
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DB00_MAX_LIFETIME=1800000
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DB00_CONNECTION_TIMEOUT=30000
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DB00_CONNECTION_TEST_QUERY=SELECT 1
+      # db01 configuration
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DB01_URL=jdbc:mysql://mysql:3306/big_market_01?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DB01_USERNAME=root
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DB01_PASSWORD=123456
+      # db02 configuration
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DB02_URL=jdbc:mysql://mysql:3306/big_market_02?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DB02_USERNAME=root
+      - MINI_DB_ROUTER_JDBC_DATASOURCE_DB02_PASSWORD=123456
+      - REDIS_SDK_CONFIG_HOST=redis
+      - REDIS_SDK_CONFIG_PORT=6379
+      # RabbitMQ
+      - SPRING_RABBITMQ_ADDRESSES=116.198.201.187
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=admin
+      - SPRING_RABBITMQ_PASSWORD=admin
+      - SPRING_RABBITMQ_LISTENER_SIMPLE_PREFETCH=1
+      - SPRING_RABBITMQ_TOPIC_ACTIVITY_SKU_STOCK_ZERO=activity_sku_stock_zero
+      - SPRING_RABBITMQ_TOPIC_SEND_AWARD=send_award
+      - SPRING_RABBITMQ_TOPIC_SEND_REBATE=send_rebate
+    volumes:
+      - ./log:/data/log
+    networks:
+      - my-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+  big-market-front-app:
+    container_name: big-market-front-app
+    image: fuzhengwei/big-market-front-app:2.0
+    restart: always
+    networks:
+      - my-network
+    ports:
+      - 3000:3000
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://0.0.0.0:3000/" ]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+
+networks:
+  my-network:
+    driver: bridge

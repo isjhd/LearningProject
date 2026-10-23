@@ -1,0 +1,95 @@
+package cn.bugstack.ai.domain.agent.service.armory.node;
+
+import cn.bugstack.ai.domain.agent.model.entity.ArmoryCommandEntity;
+import cn.bugstack.ai.domain.agent.model.valobj.AiAgentConfigTableVO;
+import cn.bugstack.ai.domain.agent.model.valobj.AiAgentRegisterVO;
+import cn.bugstack.ai.domain.agent.service.armory.AbstractArmorySupport;
+import cn.bugstack.ai.domain.agent.service.armory.factory.DefaultArmoryFactory;
+import cn.bugstack.ai.domain.agent.service.armory.matter.tools.SshExecuteAdkTool;
+import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
+import com.google.adk.agents.LlmAgent;
+import com.google.adk.models.springai.SpringAI;
+import com.google.adk.tools.FunctionTool;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.tool.ToolCallback;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+
+@Slf4j
+@Service
+public class AgentNode extends AbstractArmorySupport {
+
+    @Resource
+    private AgentWorkflowNode agentWorkflowNode;
+    
+    @Resource
+    private SshExecuteAdkTool sshExecuteAdkTool;
+
+    @Override
+    protected AiAgentRegisterVO doApply(ArmoryCommandEntity requestParameter, DefaultArmoryFactory.DynamicContext dynamicContext) throws Exception {
+        log.info("Ai Agent 装配操作 - AgentNode");
+
+        // 获取AI大模型实例（来自上下文）
+        ChatModel chatModel = dynamicContext.getChatModel();
+        // 从请求参数中获取AI Agent的完整配置
+        AiAgentConfigTableVO aiAgentConfigTableVO = requestParameter.getAiAgentConfigTableVO();
+        // 获取配置中定义的所有Agent列表
+        List<AiAgentConfigTableVO.Module.Agent> agents = aiAgentConfigTableVO.getModule().getAgents();
+
+        // 把 Java 业务方法（SSH 执行命令）封装成 AI Agent 能调用的工具，实现 AI 调用服务器执行 SSH 命令的能力。
+        for (AiAgentConfigTableVO.Module.Agent agentConfig : agents) {
+            // 建造者模式：构建LlmAgent（大语言模型智能体）
+            LlmAgent.Builder builder = LlmAgent.builder()
+                    .name(agentConfig.getName())
+                    .description(agentConfig.getDescription())
+                    .model(new SpringAI(chatModel))
+                    .instruction(agentConfig.getInstruction())
+                    .outputKey(agentConfig.getOutputKey());
+
+            // 构建 ADK 工具列表
+            List<Object> adkTools = new ArrayList<>();
+
+            // 添加 SSH 执行工具（ADK 原生 FunctionTool）
+            try {
+                log.info("开始创建 SSH 执行工具, sshExecuteAdkTool={}", sshExecuteAdkTool);
+                // 创建SSH执行工具（将业务工具封装为AI可用的FunctionTool）
+                FunctionTool sshTool = FunctionTool.create(sshExecuteAdkTool, "executeCommand");
+                log.info("FunctionTool 创建成功: name={}, declaration={}",
+                        sshTool.name(),
+                        sshTool.declaration().isPresent() ? sshTool.declaration().get() : "null");
+                adkTools.add(sshTool);
+                log.info("为 Agent [{}] 注册 SSH 执行工具成功", agentConfig.getName());
+            } catch (Exception e) {
+                log.error("创建 SSH ADK 工具失败", e);
+            }
+
+            if (!adkTools.isEmpty()) {
+                log.info("为 Agent [{}] 注册 {} 个工具", agentConfig.getName(), adkTools.size());
+                // 将工具注册到Agent
+                builder.tools(adkTools);
+            } else {
+                log.warn("Agent [{}] 没有注册任何工具！", agentConfig.getName());
+            }
+
+            // 构建最终Agent实例
+            LlmAgent llmAgent = builder.build();
+            
+            // 打印 Agent 的工具信息
+            log.info("Agent [{}] 构建完成, tools={}", agentConfig.getName(), llmAgent.tools());
+            // 将Agent存入上下文的Agent分组（供后续流程使用）
+            dynamicContext.getAgentGroup().put(agentConfig.getName(), llmAgent);
+        }
+
+        return router(requestParameter, dynamicContext);
+    }
+
+    @Override
+    public StrategyHandler<ArmoryCommandEntity, DefaultArmoryFactory.DynamicContext, AiAgentRegisterVO> get(ArmoryCommandEntity requestParameter, DefaultArmoryFactory.DynamicContext dynamicContext) throws Exception {
+        return agentWorkflowNode;
+    }
+
+}

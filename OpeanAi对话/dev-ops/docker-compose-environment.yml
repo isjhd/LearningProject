@@ -1,0 +1,23 @@
+# 命令执行 docker-compose -f docker-compose-environment.yml up -d
+version: '3.9'
+services:
+  nginx:
+    image: nginx:1.25.1
+    container_name: nginx
+    restart: always
+    ports:
+      - '443:443'
+      - '80:80'
+    volumes:
+      - ./nginx/logs:/var/log/nginx
+      - ./nginx/html:/usr/share/nginx/html
+      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl/
+    privileged: true
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge

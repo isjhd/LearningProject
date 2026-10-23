@@ -1,0 +1,72 @@
+ai:
+  agent:
+    config:
+      tables:
+        demoAgent:
+          app-name: demoAgent
+          agent:
+            agent-id: 100000
+            agent-name: demoAgent
+            agent-desc: demoAgent
+          module:
+            ai-api:
+              base-url: https://apis.itedus.cn
+              api-key: sk-tilEamI7Db17hSx71748E9DbB47449D186Ac466542Eb63A6
+              completions-path: v1/chat/completions
+              embeddings-path: v1/embeddings
+            chat-model:
+              model: gpt-4.1
+              tool-mcp-list:
+                # sse格式结构，配置所需的 mcp 服务
+                - sse:
+                    name: baidu-search
+                    base-uri: http://appbuilder.baidu.com/v2/ai_search/mcp/
+                    sse-endpoint: sse?api_key=bce-v3/ALTAK-WjK8NIh3txZo7rXXEjhri/e2f09d53de961bcaf2609b76c7c7a7e6d0f05da3
+                    request-timeout: 500000
+                # local本地实现的，mcp 服务，在 ai-agent-scaffold-lite-domain 模块下，cn.bugstack.ai.domain.agent.service.armory.matter.mcp.server 下实现服务
+                - local:
+                    name: myToolCallbackProvider
+              # 可以配置 skills 技能书，放到 resource/agent/skills 下。
+              tool-skills-list:
+                - type: resource
+                  path: agent/skills
+            # agents 下可以按需配置多个单一智能体，这些智能体可以在 agent-workflows 组合，使用 loop 循环、parallel 并行、sequential 串行来组装。你需要根据用户的诉求，配置一套智能体组合。
+            agents:
+              # 配置智能体，name 名称、description 描述、instruction 指令提示词、output-key 输出结果(按需选择)。如果需要使用输出结果，需要在下一个智能体里，使用 {输出key} 来获得。
+              - name: agentDemo01，英文名称
+                description: 智能体用途描述
+                instruction: |
+                  智能体指令 prompt 详细介绍
+                output-key: my_01_out_result
+              # 配置智能体，name 名称、description 描述、instruction 指令提示词、output-key 输出结果(按需选择)。如果需要使用输出结果，需要在下一个智能体里，使用 {输出key} 来获得。
+              - name: agentDemo02，英文名称
+                description: 智能体用途描述
+                instruction: |
+                  智能体指令 prompt 详细介绍，{my_01_out_result}
+                output-key: my_02_out_result
+            # agent-workflows 是智能体工作流，可以被组合。
+            # 1. loop 作用，循环执行 sub-agents 下的每个智能体，sub-agents 下配置的是 agents 下的单一智能体。配置后，它的执行方式是；分析、规划、执行，可以配置最大循环步骤，max-iterations
+            # 2. parallel 作用，并行执行 sub-agents 下的每个智能体，sub-agents 下配置的是 agents 下的单一智能体。配置后，它的执行方式是；一起执行这些配置的子智能体，获取结果。
+            # 3. sequential 作用，串行执行 sub-agents 下的每个智能体，sub-agents 下配置的是 agents 下的智能体，以及 loop 智能体名称、parallel 智能体名称。它的用途就是把 sub-agents 下的智能体顺序的执行，可以是子智能体和 loop、parallel 智能体。
+            agent-workflows:
+              - type: loop
+                name: loop01，英文名称
+                description: 循环智能体用途描述
+                max-iterations: 最大循环步骤
+                sub-agents:
+                  - 可以配置 agents 下的单一智能体
+                  - 可以配置 agents 下的单一智能体
+              - type: parallel
+                name: parallel01，英文名称
+                description: 并行智能体用途描述
+                sub-agents:
+                  - 可以配置 agents 下的智能体
+                  - 可以配置 agents 下的智能体
+              - type: sequential
+                name: sequential01
+                description: 串行智能体用途描述
+                sub-agents:
+                  - 配置 agents 下的智能体名称，可以按需配置多个
+                  - 配置 agent-workflows 下的智能体名称，如 loop01、parallel01，可以按需配置多个
+            runner:
+              agent-name: 指定运行的智能体入口，可以是 agents 下的单个智能体名称，也可以是 agent-workflows 配置的工作流智能体名称，如，agentDemo01、loop01、parallel01、sequential01

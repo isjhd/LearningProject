@@ -1,0 +1,62 @@
+version: '3.8'
+# 命令执行 docker-compose -f docker-compose-app.yml up -d
+services:
+  big-market-app-01:
+    image: fuzhengwei/big-market-app:4.2
+    container_name: big-market-app-01
+    restart: always
+    ports:
+      - "8091:8091"
+    environment:
+      - TZ=PRC
+      - SERVER_PORT=8091
+      - APP_CONFIG_API_VERSION=v1
+      - APP_CONFIG_CROSS_ORIGIN=*
+    volumes:
+      - ./log:/data/log
+    networks:
+      - my-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+  big-market-app-02:
+    image: fuzhengwei/big-market-app:4.2
+    container_name: big-market-app-02
+    restart: always
+    ports:
+      - "8092:8092"
+    environment:
+      - TZ=PRC
+      - SERVER_PORT=8092
+      - APP_CONFIG_API_VERSION=v1
+      - APP_CONFIG_CROSS_ORIGIN=*
+    volumes:
+      - ./log:/data/log
+    networks:
+      - my-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 访问地址 http://116.198.36.253/?userId=xiaofuge&activityId=100301
+  big-market-front-app:
+    container_name: big-market-front-app
+    image: fuzhengwei/big-market-front-app:4.1
+    restart: always
+    networks:
+      - my-network
+    ports:
+      - 3000:3000
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://0.0.0.0:3000/" ]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+
+networks:
+  my-network:
+    driver: bridge
